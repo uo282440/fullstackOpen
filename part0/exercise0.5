@@ -1,0 +1,15 @@
+sequenceDiagram
+        participant browser
+        participant server
+
+        Note right of browser: User creates a new note and it is added to the rest of the nodes
+
+       
+        browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+        activate server
+Note right of browser: the content and the timestamp of the note is sent as a json object to the server
+
+        server-->>browser: 201 response
+        Note left of server: server answers with JSON ({"message":"note created"})
+        deactivate server
+
