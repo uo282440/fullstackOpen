@@ -46,19 +46,6 @@ const Statistics = ({total, good, neutral, bad}) => {
     return (<p>No feedback given yet</p>)
 
   } else {
-    /*
-    return (
-      <>
-      <CustomStatistic text="good" quantity={good}></CustomStatistic>
-      <CustomStatistic text="neutral" quantity={neutral}></CustomStatistic>
-      <CustomStatistic text="bad" quantity={bad}></CustomStatistic>
-
-      <CustomStatistic text="total" quantity={total}></CustomStatistic>
-      <CustomStatistic text="average" quantity={ ( (1*good) + (-1*bad) ) / total }></CustomStatistic>
-      <CustomStatistic text="positive" quantity={ (1*good) / total * 100 }></CustomStatistic>
-      </>
-    )
-      */
 
     return (
       <>
