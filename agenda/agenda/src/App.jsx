@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import CustomForm from './components/CustomForm'
 import People from './components/People'
-import axios from 'axios'
+import peopleService from './services/people'
 
 const App = () => {
 
@@ -12,11 +12,11 @@ const App = () => {
   const [nameToFilter, setNameToFilter] = useState('')
 
   const hook = () => {
-    axios
-    .get('http://localhost:3001/persons')
-    .then( response =>
-      setPersons(response.data)
-    )
+    peopleService
+    .getAll()
+    .then( people => {
+      setPersons(people)
+    })
   }
 
   useEffect(hook,[])
@@ -41,6 +41,19 @@ const App = () => {
     setNameToFilter(event.target.value)
   }
 
+  const handleDeleteButton = (id) => {
+
+    const confirmation = window.confirm(`Are you sure you want to delete this user?`)
+
+    if (confirmation) {
+        peopleService
+          .deletePerson(id)
+          .then( () => {
+            setPersons(persons.filter(p => p.id !== id))
+          })
+    }
+  }
+
   const handleFormSubmit = (event) => {
     event.preventDefault()
 
@@ -50,18 +63,41 @@ const App = () => {
 
       const newPerson = {
         name: newName,
-        number: newNumber,
-        id: persons.length + 1
-  
+        number: newNumber
       }
   
-      setPersons(persons.concat(newPerson))
+      peopleService
+        .create(newPerson)
+        .then(insertedPerson => {
+          setPersons(persons.concat(insertedPerson))
+        })
+      
+      
 
     } else {
-      alert(`${newName} IS ALREADY IN THE PHONE BOOK`)
-    }
+      //alert(`${newName} is already in the phonebook. Would you like to replace the number?`)
+      const confirmed = window.confirm(`${newName} is already in the phonebook. Would you like to replace the number?`)
 
-    
+      if (confirmed) {
+        
+        let targetPerson = persons.find(p => p.name === newName)
+
+        const newPerson = {
+          name: newName,
+          number: newNumber
+        }
+
+        peopleService
+          .update(targetPerson.id, newPerson)
+          .then(
+            setPersons(persons.map( person => person.id !== targetPerson.id ? person : newPerson))
+          )
+
+      } else {
+        // El usuario hizo click en "Cancelar"
+      }
+
+    }
   }
 
 
@@ -80,7 +116,7 @@ const App = () => {
 
       <Filter handler={handleFilterByName}></Filter>
       
-      <People peopleToShow={peopleToShow}/>
+      <People peopleToShow={peopleToShow} buttonHandler={handleDeleteButton}/>
 
     </div>
   )
