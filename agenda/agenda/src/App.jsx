@@ -3,6 +3,7 @@ import Filter from './components/Filter'
 import CustomForm from './components/CustomForm'
 import People from './components/People'
 import peopleService from './services/people'
+import CustomNotification from './components/CustomNotification'
 
 const App = () => {
 
@@ -10,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [nameToFilter, setNameToFilter] = useState('')
+  const [notification, setNotification] = useState(null)
 
   const hook = () => {
     peopleService
@@ -71,8 +73,9 @@ const App = () => {
         .then(insertedPerson => {
           setPersons(persons.concat(insertedPerson))
         })
-      
-      
+
+      setNotification(`${newPerson.name} has been added to the phonebook.`)
+      setTimeout(() => {setNotification(null)}, 5000)
 
     } else {
       //alert(`${newName} is already in the phonebook. Would you like to replace the number?`)
@@ -109,6 +112,8 @@ const App = () => {
     <div>
 
       <h2>Phonebook</h2>
+
+      <CustomNotification message={notification}/>
 
       <CustomForm formHandler={handleFormSubmit} nameHnadler={handleNameInputChange} numberHandler={handleNumberInputChange}/>
 
