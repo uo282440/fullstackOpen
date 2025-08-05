@@ -2,6 +2,11 @@
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
+const cors = require('cors')
+
+
+app.use(cors())
+app.use(express.static('dist'))
 
 //modification of tiny for exercise 3.8
 app.use(morgan((tokens, req, res) => {
@@ -17,9 +22,8 @@ app.use(morgan((tokens, req, res) => {
 
 app.use(express.json())
 
-app.use(express.json())
 //app.use(morgan('tiny'))
-
+/*
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
   console.log('Path:  ', request.path)
@@ -28,7 +32,7 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-app.use(requestLogger)
+app.use(requestLogger)*/
 
 
 let persons = [
