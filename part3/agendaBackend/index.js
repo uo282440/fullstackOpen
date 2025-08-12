@@ -24,23 +24,6 @@ app.use(morgan((tokens, req, res) => {
 
 app.use(express.json())
 
-//app.use(morgan('tiny'))
-/*
-const requestLogger = (request, response, next) => {
-  console.log('Method:', request.method)
-  console.log('Path:  ', request.path)
-  console.log('Body:  ', request.body)
-  console.log('---')
-  next()
-}
-
-app.use(requestLogger)*/
-/*
-if (process.argv.length<3) {
-  console.log('give password as argument')
-  process.exit(1)
-}*/
-
 
 
 //ENDPOINTS
@@ -69,7 +52,7 @@ app.get('/api/persons/:id', async (request, response) => {
     }
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   User.findByIdAndDelete(request.params.id)
   .then(person => {
     response.status(204).end()
@@ -78,7 +61,7 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 
-app.post('/api/persons', async (request, response) => {
+app.post('/api/persons', async (request, response, next) => {
   const body = request.body
 
   if (!body.name || !body.number) {
@@ -95,9 +78,11 @@ app.post('/api/persons', async (request, response) => {
 
   if (!existingPerson) {
 
-    person.save().then(savedPerson => {
-      response.json(savedPerson)
-    })
+    person.save()
+      .then(savedPerson => {
+        response.json(savedPerson)
+      })
+      .catch(error => next(error))
 
   } else {
     
@@ -113,14 +98,14 @@ app.post('/api/persons', async (request, response) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-  const body = request.body
+  const {name, number} = request.body
 
   const user = {
     name: body.name,
     number: body.number,
   }
 
-  User.findByIdAndUpdate(request.params.id, user, { new: true })
+  User.findByIdAndUpdate(request.params.id, {name, number}, { new: true, runValidators: true, context: 'query'})
     .then(updatedUser => {
       response.json(updatedUser)
     })
@@ -140,7 +125,9 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  } else if (error.name === 'ValidationError') { 
+    return response.status(400).json({ error: error.message })  
+  }
 
   next(error)
 }
