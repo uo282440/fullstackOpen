@@ -1,9 +1,11 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
+//const app = require('./app') // la aplicación Express real
 const cors = require('cors')
-const mongoose = require('mongoose')
 const Note = require('./models/note')
+const config = require('./utils/config')
+const logger = require('./utils/logger')
 
 app.use(cors())
 app.use(express.static('dist'))
@@ -125,7 +127,10 @@ const errorHandler = (error, request, response, next) => {
 // este debe ser el último middleware cargado, ¡también todas las rutas deben ser registrada antes que esto!
 app.use(errorHandler)
 
-//const PORT = 3001
-const PORT = process.env.PORT
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
+
+//const PORT = process.env.PORT
+//app.listen(PORT)
+//console.log(`Server running on port ${PORT}`)
+app.listen(config.PORT, () => {
+  logger.info(`Server running on port ${config.PORT}`)
+})
