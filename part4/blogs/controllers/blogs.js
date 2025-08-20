@@ -1,5 +1,33 @@
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
+const jwt = require('jsonwebtoken')
+
+// Middleware para extraer el token
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    req.token = authorization.replace('Bearer ', '')
+  }
+  next()
+}
+
+// Middleware para validar el token y adjuntar el usuario
+const userExtractor = (req, res, next) => {
+  if (!req.token) {
+    return res.status(401).json({ error: 'token missing' })
+  }
+  
+  try {
+    const decodedToken = jwt.verify(req.token, process.env.SECRET)
+    if (!decodedToken.id) {
+      return res.status(401).json({ error: 'token invalid' })
+    }
+    req.user = decodedToken
+    next()
+  } catch (error) {
+    return res.status(401).json({ error: 'token invalid' })
+  }
+}
 
 blogRouter.get('/list', async (req, res) => {
   const blogs = await Blog.find({})
@@ -10,6 +38,7 @@ blogRouter.get('/list', async (req, res) => {
     })*/
 })
 
+/*
 blogRouter.post('/add', (req, res) => {
   const blog = new Blog(req.body)
   
@@ -23,6 +52,29 @@ blogRouter.post('/add', (req, res) => {
     res.status(201).json(result)
   })
   
+})*/
+blogRouter.post('/add', tokenExtractor, userExtractor, (req, res) => {
+  if (!req.body.title || !req.body.author) {
+    return res.status(400).json({ error: 'title and author are required' })
+  }
+
+  // Ahora puedes usar la información del usuario del token
+  // por ejemplo, para asociar el blog al usuario que lo crea
+  const blog = new Blog({
+    title: req.body.title,
+    author: req.body.author,
+    url: req.body.url,
+    likes: req.body.likes || 0,
+    user: req.user.id // Aquí asocias el blog al usuario
+  })
+  
+  blog.save()
+  .then(result => {
+    res.status(201).json(result)
+  })
+  .catch(error => {
+    res.status(500).json({ error: 'internal server error' })
+  })
 })
 
 blogRouter.delete('/remove/:id', async (req, res) => {
