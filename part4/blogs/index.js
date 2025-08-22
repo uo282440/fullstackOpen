@@ -4,3 +4,4 @@ const config = require('./utils/config')
 app.listen(config.PORT, () => {
   console.log(`Servidor corriendo en puerto ${config.PORT}`)
 })
+
